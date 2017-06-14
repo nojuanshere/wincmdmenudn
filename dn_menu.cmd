@@ -33,17 +33,16 @@ echo.
 :: Prompt for selection from the menu
 set /p _choice=Please enter the number for your selection^:^ 
 :: Validate choice
-if not defined _choice goto :soAppMenu
-if %_choice% LSS 0 goto :soAppMenu
-if %_choice% GTR %_i% goto :soAppMenu
+call :ValidateNum 0 %_i% %_choice%
+if ERRORLEVEL 1 goto :soAppMenu
 :: Check for exit
 if %_choice%==0 exit /b
 :: Re-initialize counter
 set /a _i=%_start%
-:: Find the selected item and call the :Stg procedure with it's parameters
+:: Find the selected item and call the :StageIt procedure with it's parameters
 for /f "usebackq tokens=3-4 delims=;" %%a in (`findstr /b /c:"::menu1" "%~dpnx0"`) do (
 	set /a _i+=1
-	if !_i!==%_choice% call :Stg "%%~a" "%%~b"
+	if !_i!==%_choice% call :StageIt "%%~a" "%%~b"
 	)
 :: Return to the menu
 goto soAppMenu
@@ -51,11 +50,25 @@ goto soAppMenu
 echo Out of bounds
 exit /b 999
 
-:Stg
+:StageIt
 :: Copy with Robocopy, wait seconds then return to the caller
 echo robocopy "%~1" "%_dest%\%~2" /e /r:2 /w:2 /np /tee /log+:"%_dest%\stageonc.txt"
 timeout 5
 exit /b
+
+:ValidateNum
+:: ValidateNum LowerLimit UpperLimit ValueToValidate
+setlocal
+set /a _ValueUndefined=255
+set /a _ValueBelowLimit=100
+set /a _ValueOverLimit=200
+set _ll=%~1
+set _ul=%~2
+set _vv=%~3
+if not defined _vv exit /b %_ValueUndefined%
+if %_vv% LSS %_ll% exit /b %_ValueBelowLimit%
+if %_vv% GTR %_ul% exit /b %_ValueOverLimit%
+exit /b 0
 
 :JuanDebug
 :: Show info helpful for debuging and return to the caller
