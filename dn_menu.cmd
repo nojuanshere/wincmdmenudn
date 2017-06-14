@@ -54,7 +54,6 @@ exit /b 999
 :Stg
 :: Copy with Robocopy, wait seconds then return to the caller
 echo robocopy "%~1" "%_dest%\%~2" /e /r:2 /w:2 /np /tee /log+:"%_dest%\stageonc.txt"
-call :JuanDebug "During :Stg procedure. Errorlevel=%ERRORLEVEL%"
 timeout 5
 exit /b
 
